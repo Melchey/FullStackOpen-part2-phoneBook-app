@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 
 // Filter component
 const Filter = ({ searchTerm, handleSearchChange }) => {
@@ -61,16 +62,18 @@ const Persons = ({ personsToShow }) => {
 
 // Main App component
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456' },
-    { name: 'Ada Lovelace', number: '39-44-5323523' },
-    { name: 'Dan Abramov', number: '12-43-234345' },
-    { name: 'Mary Poppendieck', number: '39-23-6423122' }
-  ]) 
-
+  const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
-  const [searchTerm, setSearchTerm] = useState('') // for search
+  const [searchTerm, setSearchTerm] = useState('') // for search 
+
+  useEffect(() => {
+    axios
+      .get('http://localhost:3001/persons')
+      .then(response => {
+        setPersons(response.data)
+      })
+  }, [])
 
   const addPerson = (event) => {
     event.preventDefault() //  Prevent page reload
@@ -87,11 +90,18 @@ const App = () => {
     }
 
     // create the new person object
-    const personObject = { name: newName, number: newNumber }
-    setPersons(persons.concat(personObject))
-      setNewName('')
-      setNewNumber('')
-    }
+    const personObject = { 
+      name: newName, 
+      number: newNumber, }
+
+      axios.post('http://localhost:3001/persons', 
+        personObject)
+      .then(response => {
+        setPersons(persons.concat(personObject))
+          setNewName('')
+          setNewNumber('')
+        })
+  }
 
   const handleNameChange = (e) => {setNewName(e.target.value)}
   const handleNumberChange = (e) => {setNewNumber(e.target.value)}
